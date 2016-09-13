@@ -1,17 +1,17 @@
 #!/usr/bin/python
-# project/server/socket/server.py
 # coding: utf-8
 
 
 import socket
 import thread
+
 from commands import COMMANDS, RunCommand
 
 HOST = '0.0.0.0'
 PORT = 1234
 
 
-class Voyager2():
+class Voyager1():
 
     def __init__(self, host, port):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -35,4 +35,4 @@ class Voyager2():
 
 
 if __name__ == "__main__":
-    Voyager2(HOST, PORT)
+    Voyager1(HOST, PORT)

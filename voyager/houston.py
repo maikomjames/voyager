@@ -1,19 +1,16 @@
 #!/usr/bin/python
-# project/server/socket/server.py
 # coding: utf-8
 
-import socket
-import thread
 import signal
+import socket
 import sys
-from commands import COMMANDS, RunCommand
-
+import thread
 
 HOST = '0.0.0.0'
 PORT = 1234
 
 
-class Voyager1():
+class Houston():
 
     def __init__(self, host, port):
         self.host = host
@@ -90,4 +87,4 @@ class Voyager1():
 
 
 if __name__ == "__main__":
-    Voyager1(HOST, PORT)
+    Houston(HOST, PORT)
