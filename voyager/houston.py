@@ -5,9 +5,7 @@ import signal
 import socket
 import sys
 import thread
-
-HOST = '0.0.0.0'
-PORT = 1234
+from config import HOST, PORT
 
 
 class Houston():
@@ -18,14 +16,13 @@ class Houston():
 
         self.clients = []
 
-        signal.signal(signal.SIGINT, self.signal_handler)
+        # signal.signal(signal.SIGINT, self.signal_handler)
         self.conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
         self.conn.bind(tuple([host, port]))
         self.conn.listen(1)
 
         thread.start_new_thread(self.read_clientes, tuple())
-        self.input()
 
     def read_clientes(self):
         while True:
@@ -38,10 +35,12 @@ class Houston():
             if not msg:
                 break
             self.add_clients(con, cliente)
-            self.command(msg, con)
 
         con.close()
         thread.exit()
+
+    def close(self):
+        self.conn.close()
 
     def command(self, cmd, con):
         try:
@@ -64,16 +63,12 @@ class Houston():
                 return
 
     def sendCommandAllPeer(self, cmd):
-        print('Enviando comando aos clients')
         for cl in self.clients:
-            print(cl[1])
             self.command(cmd, cl[0])
-        print (len(self.clients))
 
     def input(self):
         msg = raw_input()
         while msg <> '\x18':
-            print('send command %s' % msg)
             self.sendCommandAllPeer(msg)
             msg = raw_input()
 

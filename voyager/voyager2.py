@@ -4,11 +4,8 @@
 
 import socket
 import thread
-
+from config import HOST, PORT
 from voyager.commands import COMMANDS, RunCommand
-
-HOST = '0.0.0.0'
-PORT = 1234
 
 
 class Voyager2():
