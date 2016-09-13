@@ -4,7 +4,7 @@
 import sys
 import subprocess
 
-COMMANDS = ['help', 'ping', 'whoami']
+COMMANDS = ['help', 'ping', 'whoami', 'areyoualive', 'listsocketclients']
 
 
 class Command():
@@ -19,9 +19,17 @@ class Command():
             retcode = p.poll()
             line = p.stdout.readline()
             print (line)
-            self.socket.send(line)
+            self.socket.send(self.print_line(line))
             if (retcode is not None):
                 break
+
+    def print_line(self, str):
+        return '%s\n' % str
+
+
+class RunCommand():
+    def __init__(self, cmd, con):
+        globals()[cmd](con).run()
 
 
 class whoami(Command):
@@ -31,9 +39,23 @@ class whoami(Command):
 
 class ping(Command):
 
-    Name = ['ping', '-c', '15', '-w', '5', '8.8.8.8']
+    Name = ['ping', '-c', '20', '-w', '20', '8.8.8.8']
 
 
 class help(Command):
 
     Name = ['help']
+
+    def run(self):
+        for command in COMMANDS:
+            self.socket.send(self.print_line(command))
+
+
+class areyoualive(Command):
+
+    Name = ['areyoualive']
+
+    def run(self):
+        self.socket.send(self.print_line('yes, I am ;)'))
+
+
