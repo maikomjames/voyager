@@ -26,8 +26,12 @@ class Houston():
 
     def read_clientes(self):
         while True:
-            con, cliente = self.conn.accept()
-            thread.start_new_thread(self.process_client_message, tuple([con, cliente]))
+            try:
+                con, cliente = self.conn.accept()
+                thread.start_new_thread(self.process_client_message, tuple([con, cliente]))
+            except Exception as e:
+                pass
+                #print("Error: %s" % e.message)
 
     def process_client_message(self, con, cliente):
         while True:
