@@ -5,7 +5,6 @@
 import socket
 import thread
 from config import HOST, PORT
-from voyager.commands import COMMANDS, RunCommand
 
 
 class Voyager2():
@@ -31,3 +30,13 @@ class Voyager2():
 
     def close(self):
         self.socket.close()
+
+    def input(self):
+        msg = raw_input()
+        while msg <> '\x18':
+            print("enviando: " + msg)
+            self.sendCommandsAllPeers(msg)
+            msg = raw_input()
+
+if __name__ == "__main__":
+    Voyager2(HOST, PORT).input()

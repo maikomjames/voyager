@@ -22,6 +22,7 @@ class Command():
             line = p.stdout.readline()
             self.output += line
             self.socket.send(self.print_line(line))
+            print(line)
             if (retcode is not None):
                 # self.output = ''
                 break
