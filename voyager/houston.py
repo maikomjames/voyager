@@ -1,12 +1,13 @@
 #!/usr/bin/python
 # coding: utf-8
 
-import signal
+from time import sleep
 import socket
 import sys
 import thread
 from config import HOST, PORT
 import re
+from datetime import datetime
 
 
 class Houston():
@@ -39,6 +40,7 @@ class Houston():
             if not msg:
                 break
             m = re.search('Command:\s(.*)', msg)
+            self.print_messages("%s: %s" % (cliente, msg))
             if m:
                 self.sendCommandAllPeer(m.group(1))
             self.add_clients(con, cliente)
@@ -72,10 +74,18 @@ class Houston():
         for cl in self.clients:
             self.command(cmd, cl[0])
 
+    def listen(self):
+        while True:
+            pass
+
+    def print_messages(self, msg):
+        print ("%s - %s" % (datetime.now().strftime("%Y-%m-%d %H:%M:%S"), msg))
+
     def __del__(self):
         self.conn.close()
         sys.exit(0)
 
 
 if __name__ == "__main__":
-    Houston(HOST, PORT)
+    houston = Houston(HOST, PORT)
+    houston.listen()
