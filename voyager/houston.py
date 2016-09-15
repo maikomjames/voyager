@@ -5,7 +5,7 @@ from time import sleep
 import socket
 import sys
 import thread
-from config import HOST, PORT
+from config import PORT
 import re
 from datetime import datetime
 
@@ -87,5 +87,5 @@ class Houston():
 
 
 if __name__ == "__main__":
-    houston = Houston(HOST, PORT)
+    houston = Houston('0.0.0.0', PORT)
     houston.listen()

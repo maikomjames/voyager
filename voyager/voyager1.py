@@ -5,6 +5,7 @@
 import socket
 import thread
 from config import HOST, PORT
+from datetime import datetime
 
 from commands import COMMANDS, RunCommand
 
@@ -25,6 +26,7 @@ class Voyager1():
             msg = self.socket.recv(1024)
             if not msg:
                 break
+            self.print_messages(msg)
             self.command(msg)
 
     def command(self, cmd):
@@ -37,5 +39,12 @@ class Voyager1():
     def close(self):
         self.socket.close()
 
+    def listen(self):
+        while True:
+            pass
+
+    def print_messages(self, msg):
+        print ("%s - %s" % (datetime.now().strftime("%Y-%m-%d %H:%M:%S"), msg))
+
 if __name__ == "__main__":
-    Voyager1(HOST, PORT)
+    Voyager1(HOST, PORT).listen()
