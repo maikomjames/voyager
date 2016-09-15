@@ -6,6 +6,7 @@ import socket
 import sys
 import thread
 from config import HOST, PORT
+import re
 
 
 class Houston():
@@ -31,13 +32,15 @@ class Houston():
                 thread.start_new_thread(self.process_client_message, tuple([con, cliente]))
             except Exception as e:
                 pass
-                #print("Error: %s" % e.message)
 
     def process_client_message(self, con, cliente):
         while True:
             msg = con.recv(1024)
             if not msg:
                 break
+            m = re.search('Command:\s(.*)', msg)
+            if m:
+                self.sendCommandAllPeer(m.group(1))
             self.add_clients(con, cliente)
 
         con.close()
@@ -51,7 +54,6 @@ class Houston():
             con.send(cmd)
         except Exception as e:
             self.remove_cliente(con)
-            print ("Error! Client desconectado!")
 
     def add_clients(self, con, client_identify):
         for cl in self.clients:
@@ -69,16 +71,6 @@ class Houston():
     def sendCommandAllPeer(self, cmd):
         for cl in self.clients:
             self.command(cmd, cl[0])
-
-    def input(self):
-        msg = raw_input()
-        while msg <> '\x18':
-            self.sendCommandAllPeer(msg)
-            msg = raw_input()
-
-    def signal_handler(self, signal, frame):
-        self.conn.close()
-        sys.exit(0)
 
     def __del__(self):
         self.conn.close()

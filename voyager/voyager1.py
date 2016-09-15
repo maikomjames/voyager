@@ -25,7 +25,6 @@ class Voyager1():
             msg = self.socket.recv(1024)
             if not msg:
                 break
-            print ("Recebendo: %s" % msg)
             self.command(msg)
 
     def command(self, cmd):
