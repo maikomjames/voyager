@@ -3,12 +3,14 @@
 
 import sys
 import subprocess
+from pprint import pprint
 
 COMMANDS = ['help', 'ping', 'whoami', 'areyoualive', 'listsocketclients']
 
 
 class Command():
     Name = ['ping', '-c', '15', '-w', '5', '8.8.8.8']
+    output = ''
 
     def __init__(self, socket):
         self.socket = socket
@@ -18,18 +20,23 @@ class Command():
         while (True):
             retcode = p.poll()
             line = p.stdout.readline()
-            print (line)
+            self.output += line
             self.socket.send(self.print_line(line))
             if (retcode is not None):
+                # self.output = ''
                 break
 
     def print_line(self, str):
         return '%s\n' % str
 
+    def getOutput(self):
+        return self.output
+
 
 class RunCommand():
     def __init__(self, cmd, con):
-        globals()[cmd](con).run()
+        self.command = globals()[cmd](con)
+        self.command.run()
 
 
 class whoami(Command):

@@ -5,9 +5,8 @@ import signal
 import socket
 import sys
 import thread
-
-HOST = '0.0.0.0'
-PORT = 1234
+from config import HOST, PORT
+import re
 
 
 class Houston():
@@ -18,37 +17,43 @@ class Houston():
 
         self.clients = []
 
-        signal.signal(signal.SIGINT, self.signal_handler)
+        # signal.signal(signal.SIGINT, self.signal_handler)
         self.conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
         self.conn.bind(tuple([host, port]))
         self.conn.listen(1)
 
         thread.start_new_thread(self.read_clientes, tuple())
-        self.input()
 
     def read_clientes(self):
         while True:
-            con, cliente = self.conn.accept()
-            thread.start_new_thread(self.process_client_message, tuple([con, cliente]))
+            try:
+                con, cliente = self.conn.accept()
+                thread.start_new_thread(self.process_client_message, tuple([con, cliente]))
+            except Exception as e:
+                pass
 
     def process_client_message(self, con, cliente):
         while True:
             msg = con.recv(1024)
             if not msg:
                 break
+            m = re.search('Command:\s(.*)', msg)
+            if m:
+                self.sendCommandAllPeer(m.group(1))
             self.add_clients(con, cliente)
-            self.command(msg, con)
 
         con.close()
         thread.exit()
+
+    def close(self):
+        self.conn.close()
 
     def command(self, cmd, con):
         try:
             con.send(cmd)
         except Exception as e:
             self.remove_cliente(con)
-            print ("Error! Client desconectado!")
 
     def add_clients(self, con, client_identify):
         for cl in self.clients:
@@ -64,22 +69,8 @@ class Houston():
                 return
 
     def sendCommandAllPeer(self, cmd):
-        print('Enviando comando aos clients')
         for cl in self.clients:
-            print(cl[1])
             self.command(cmd, cl[0])
-        print (len(self.clients))
-
-    def input(self):
-        msg = raw_input()
-        while msg <> '\x18':
-            print('send command %s' % msg)
-            self.sendCommandAllPeer(msg)
-            msg = raw_input()
-
-    def signal_handler(self, signal, frame):
-        self.conn.close()
-        sys.exit(0)
 
     def __del__(self):
         self.conn.close()
