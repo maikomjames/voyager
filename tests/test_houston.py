@@ -5,8 +5,9 @@ from time import sleep
 from voyager.voyager1 import Voyager1
 from voyager.voyager2 import Voyager2
 from voyager.houston import Houston
-from voyager.config import HOST
 import subprocess
+
+HOST = '0.0.0.0'
 
 
 class HoustonTestCase(unittest.TestCase):

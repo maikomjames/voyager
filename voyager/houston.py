@@ -1,11 +1,8 @@
 #!/usr/bin/python
 # coding: utf-8
 
-from time import sleep
 import socket
-import sys
 import thread
-from config import PORT
 import re
 from datetime import datetime
 
@@ -18,7 +15,6 @@ class Houston():
 
         self.clients = []
 
-        # signal.signal(signal.SIGINT, self.signal_handler)
         self.conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
         self.conn.bind(tuple([host, port]))
@@ -74,10 +70,6 @@ class Houston():
         for cl in self.clients:
             self.command(cmd, cl[0])
 
-    def listen(self):
-        while True:
-            pass
-
     def print_messages(self, msg):
         print ("%s - %s" % (datetime.now().strftime("%Y-%m-%d %H:%M:%S"), msg))
 
@@ -87,5 +79,15 @@ class Houston():
 
 
 if __name__ == "__main__":
-    houston = Houston('0.0.0.0', PORT)
-    houston.listen()
+    import sys
+    try:
+        HOST = sys.argv[1]
+        PORT = int(sys.argv[2])
+
+        Houston(HOST, PORT)
+        raw_input()
+    except Exception as e:
+        print "Error: %s" % e.message
+        raise
+
+

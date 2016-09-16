@@ -4,7 +4,6 @@
 
 import socket
 import thread
-from config import HOST, PORT
 from datetime import datetime
 
 from commands import COMMANDS, RunCommand

@@ -4,7 +4,6 @@
 
 import socket
 import thread
-from config import HOST, PORT
 
 
 class Voyager2():
@@ -39,4 +38,14 @@ class Voyager2():
             msg = raw_input()
 
 if __name__ == "__main__":
-    Voyager2(HOST, PORT).input()
+    import sys
+    try:
+        HOST = sys.argv[1]
+        PORT = sys.argv[2]
+
+        Voyager2(HOST, PORT).input()
+    except Exception as e:
+        print "Error: %s" % e.message
+        raise
+
+
