@@ -1,81 +1,76 @@
 #!/usr/bin/python
 # coding: utf-8
 
-import signal
-import socket
-import sys
-import thread
-from config import HOST, PORT
-import re
+
+import SocketServer
+import threading
 
 
-class Houston():
+class HoustonThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
+    """
+    The request handler class for our server.
 
-    def __init__(self, host, port):
-        self.host = host
-        self.port = port
+    It is instantiated once per connection to the server, and must
+    override the handle() method to implement communication to the
+    client.
+    """
+    def handle(self):
+        # self.request is the TCP socket connected to the client
+        self.server.add_client((self.client_address, self.request))
 
+        self.data = self.request.recv(1024).strip()
+        self.server.last_message_sent = self.data
+        print "Recebi server: {}".format(self.data)
+        # print "{} wrote:".format(self.client_address[0])
+        # print self.data
+        # just send back the same data, but upper-cased
+        self.server.envia_mensage(self.data)
+
+
+class HoustonThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
+
+    def __init__(self, *args, **kws):
         self.clients = []
+        self.last_message_sent = None
+        SocketServer.TCPServer.__init__(self, *args, **kws)
 
-        # signal.signal(signal.SIGINT, self.signal_handler)
-        self.conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    def add_client(self, client):
+        self.clients.append(client)
 
-        self.conn.bind(tuple([host, port]))
-        self.conn.listen(1)
+    def get_last_message_sent(self):
+        return self.last_message_sent
 
-        thread.start_new_thread(self.read_clientes, tuple())
+    def envia_mensage(self, message):
+        for client_data in self.clients:
+            client, request = client_data
+            request.sendall(message)
 
-    def read_clientes(self):
-        while True:
-            try:
-                con, cliente = self.conn.accept()
-                thread.start_new_thread(self.process_client_message, tuple([con, cliente]))
-            except Exception as e:
-                pass
 
-    def process_client_message(self, con, cliente):
-        while True:
-            msg = con.recv(1024)
-            if not msg:
-                break
-            m = re.search('Command:\s(.*)', msg)
-            if m:
-                self.sendCommandAllPeer(m.group(1))
-            self.add_clients(con, cliente)
+class Houston:
 
-        con.close()
-        thread.exit()
+    def __init__(self, config):
+        self.config = config
+        self.server = None
+        self.server_thread = None
+
+    def listen(self):
+
+        # Create the server
+        self.server = HoustonThreadedTCPServer(self.config, HoustonThreadedTCPRequestHandler)
+        self.server_thread = threading.Thread(target=self.server.serve_forever)
+        self.server_thread.daemon = True
+        self.server_thread.start()
 
     def close(self):
-        self.conn.close()
+        self.server.shutdown()
+        self.server.server_close()
 
-    def command(self, cmd, con):
-        try:
-            con.send(cmd)
-        except Exception as e:
-            self.remove_cliente(con)
+    def count_clients(self):
+        return len(self.server.clients)
 
-    def add_clients(self, con, client_identify):
-        for cl in self.clients:
-            if cl[1] == client_identify:
-                return
-
-        self.clients.append((con, client_identify))
-
-    def remove_cliente(self, con):
-        for cl in self.clients:
-            if cl[0] == con:
-                self.clients.remove(cl)
-                return
-
-    def sendCommandAllPeer(self, cmd):
-        for cl in self.clients:
-            self.command(cmd, cl[0])
-
-    def __del__(self):
-        self.conn.close()
-        sys.exit(0)
+    def get_last_message_sent(self):
+        return self.server.last_message_sent
 
 
-if __name__ == "__main__":
-    Houston(HOST, PORT)
+# if __name__ == "__main__":
+#     Houston(HOST, PORT)
