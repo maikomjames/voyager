@@ -46,4 +46,13 @@ class Voyager1():
         print ("%s - %s" % (datetime.now().strftime("%Y-%m-%d %H:%M:%S"), msg))
 
 if __name__ == "__main__":
-    Voyager1(HOST, PORT).listen()
+    import sys
+
+    try:
+        HOST = sys.argv[1]
+        PORT = int(sys.argv[2])
+
+        Voyager1(HOST, PORT).listen()
+    except Exception as e:
+        print "Error: %s" % e.message
+        raise

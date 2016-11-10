@@ -41,7 +41,7 @@ if __name__ == "__main__":
     import sys
     try:
         HOST = sys.argv[1]
-        PORT = sys.argv[2]
+        PORT = int(sys.argv[2])
 
         Voyager2(HOST, PORT).input()
     except Exception as e:

@@ -34,6 +34,7 @@ class HoustonTestCase(unittest.TestCase):
         port = 1213
 
         houston = Houston(HOST, port)
+
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         result = sock.connect_ex((HOST, port))
         self.assertEqual(result, 0)
