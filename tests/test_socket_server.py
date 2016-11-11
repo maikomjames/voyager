@@ -11,8 +11,7 @@ from voyager.mission_control import MissionControl
 class SocketServerTestCase(unittest.TestCase):
 
     def test_open_connection(self):
-
-        config = ('0.0.0.0', 1234)
+        config = ('0.0.0.0', random.randrange(1000, 1999))
         server = Houston(config)
         server.listen()
 
@@ -21,7 +20,7 @@ class SocketServerTestCase(unittest.TestCase):
         self.assertEqual(result, 0)
 
     def test_close_connection(self):
-        config = ('0.0.0.0', 1235)
+        config = ('0.0.0.0', random.randrange(1000, 1999))
         server = Houston(config)
         server.listen()
 
@@ -36,8 +35,7 @@ class SocketServerTestCase(unittest.TestCase):
         self.assertNotEqual(result, 0)
 
     def test_accept_one_client_connections(self):
-
-        config = ('0.0.0.0', 1236)
+        config = ('0.0.0.0', random.randrange(1000, 1999))
         server = Houston(config)
         server.listen()
 
@@ -49,7 +47,7 @@ class SocketServerTestCase(unittest.TestCase):
         self.assertEqual(server.count_clients(), 1)
 
     def test_accept_any_client_connections(self):
-        config = ('0.0.0.0', 1237)
+        config = ('0.0.0.0', random.randrange(1000, 1999))
         server = Houston(config)
         server.listen()
 
@@ -71,7 +69,7 @@ class SocketServerTestCase(unittest.TestCase):
         self.assertEqual(server.count_clients(), 3)
 
     def test_mission_control_connection_on_server(self):
-        config = ('0.0.0.0', 1238)
+        config = ('0.0.0.0', random.randrange(1000, 1999))
         server = Houston(config)
         server.listen()
 
@@ -85,7 +83,7 @@ class SocketServerTestCase(unittest.TestCase):
         server.close()
 
     def test_mission_control_sending_message_to_server(self):
-        config = ('0.0.0.0', 1239)
+        config = ('0.0.0.0', random.randrange(1000, 1999))
         server = Houston(config)
         server.listen()
 
@@ -117,9 +115,8 @@ class SocketServerTestCase(unittest.TestCase):
 
         time.sleep(2)
 
+        client1.close()
+        mission.close()
         server.close()
-        # client1.close()
-        # mission.close()
 
-        self.assertEqual(server.count_clients(), 2)
         self.assertEqual(client1.get_last_message_sent(), 'hello')

@@ -1,18 +1,18 @@
 import socket
 import thread
 
+
 class Voyager:
 
     def __init__(self, config):
         self.config = config
         self.sock = None
-        self.last_message_sent = None
+        self.last_message_sent = ''
         self.thread_read = None
 
     def connect(self):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.connect(self.config)
-        self.sock.send('have we problems?')
         self.thread_read = thread.start_new_thread(self.read_anserws, ())
 
     def read_anserws(self):

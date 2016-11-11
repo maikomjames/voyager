@@ -12,7 +12,8 @@ class MissionControl:
         self.sock.connect(self.config)
 
     def send(self, message):
-        self.sock.sendall(message)
+        print("Mission sad: {}".format(message))
+        self.sock.sendall("Mission sad: {}".format(message))
 
     def close(self):
         self.sock.close()

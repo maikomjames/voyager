@@ -4,6 +4,43 @@
 
 import SocketServer
 import threading
+import re
+
+
+class HoustonListClients:
+    def __init__(self, *args, **kws):
+        self.clients = []
+
+    def add_client(self, request, address):
+        self.clients.append(HoustonClientRequest(client_address=address, request=request))
+
+    def get_clients(self):
+        return self.clients
+
+    def get_total_clients(self):
+        return len(self.clients)
+
+    def sendall(self, message):
+        for cli in self.clients:
+            if not cli.is_mission_control:
+                cli.request.sendall(message)
+
+    def get_client(self, address):
+        for cli in self.clients:
+            if cli.client_address == address:
+                return cli
+        return None
+
+    def set_as_mission(self, address):
+        cli = self.get_client(address)
+        cli.is_mission_control = True
+
+
+class HoustonClientRequest:
+    def __init__(self, *args, **kws):
+        self.client_address = kws.get('client_address')
+        self.request = kws.get('request')
+        self.is_mission_control = kws.get('is_mission_control', False)
 
 
 class HoustonThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
@@ -15,35 +52,32 @@ class HoustonThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
     client.
     """
     def handle(self):
-        # self.request is the TCP socket connected to the client
-        self.server.add_client((self.client_address, self.request))
 
         self.data = self.request.recv(1024).strip()
-        self.server.last_message_sent = self.data
-        print "Recebi server: {}".format(self.data)
-        # print "{} wrote:".format(self.client_address[0])
-        # print self.data
-        # just send back the same data, but upper-cased
-        self.server.envia_mensage(self.data)
+        print("Houston recebeu: {}".format(self.data))
+        r = re.search('Mission\ssad\:?\s(.*)', self.data)
+        if r:
+            self.server.clients.set_as_mission(self.client_address)
+            self.server.last_message_sent = r.group(1)
+            self.server.clients.sendall(r.group(1))
 
 
 class HoustonThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
 
     def __init__(self, *args, **kws):
-        self.clients = []
+        self.clients = HoustonListClients()
         self.last_message_sent = None
         SocketServer.TCPServer.__init__(self, *args, **kws)
-
-    def add_client(self, client):
-        self.clients.append(client)
 
     def get_last_message_sent(self):
         return self.last_message_sent
 
-    def envia_mensage(self, message):
-        for client_data in self.clients:
-            client, request = client_data
-            request.sendall(message)
+    def process_request(self, *args, **kws):
+        self.clients.add_client(*args)
+        SocketServer.ThreadingMixIn.process_request(self, *args, **kws)
+
+    # def process_request_thread(self, *args, **kws):
+    #     self.finish_request(*args, **kws)
 
 
 class Houston:
@@ -66,11 +100,22 @@ class Houston:
         self.server.server_close()
 
     def count_clients(self):
-        return len(self.server.clients)
+        return self.server.clients.get_total_clients()
 
     def get_last_message_sent(self):
         return self.server.last_message_sent
 
 
-# if __name__ == "__main__":
-#     Houston(HOST, PORT)
+if __name__ == "__main__":
+    import sys
+
+    try:
+        HOST = sys.argv[1]
+        PORT = int(sys.argv[2])
+
+        h = Houston((HOST, PORT))
+        h.listen()
+    except Exception as e:
+        print "Error: %s" % e.message
+        raise
+
